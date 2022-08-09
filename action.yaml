@@ -1,0 +1,31 @@
+name: 'AzureVM Managment'
+description: 'Start or Stop Azure VM by resource groups.'
+inputs:
+  CLIENT_ID:
+    description: 'Client ID'
+    required: true
+  CLIENT_SECRET:
+    description: 'Client Secret'
+    required: true
+  TENANT_ID:
+    description: 'Client Tenant ID'
+    required: true
+  OPERATION:
+    description: "start or stop value describing the desired action"
+    required: true
+    default: "stop"
+  RESOURCE_GROUP:
+    description: "The Resource Group of the VM's that we want to operated on."
+    required: true
+    default: "qa"
+runs:
+  using: "composite"
+  steps:
+    - name: Login to Azure
+      shell: bash
+      run: az login --service-principal -u '${{ inputs.CLIENT_ID }}' -p '${{ inputs.CLIENT_SECRET }}' --tenant '${{ inputs.TENANT_ID }}'
+    - name:  ${{ inputs.OPERATION }} azure vm 
+      shell: bash
+      run: az vm ${{ inputs.OPERATION }} --ids $(az vm list -g '${{ inputs.RESOURCE_GROUP }}' --query "[].id" -o tsv)
+
+      
